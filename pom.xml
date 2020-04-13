@@ -12,6 +12,7 @@
 	<properties>
 		<revision>2.1.14.BUILD-SNAPSHOT</revision>
 		<main.basedir>${basedir}</main.basedir>
+		<disable.checks>true</disable.checks>
 	</properties>
 	<!-- Most elements are in profiles so they are stripped out during maven-flatten -->
 	<profiles>
@@ -107,6 +108,7 @@
 			<modules>
 				<module>spring-boot-project</module>
 				<!-- Samples are built via the invoker plugin -->
+				<module>spring-boot-samples</module>
 				<module>spring-boot-samples-invoker</module>
 				<module>spring-boot-tests</module>
 			</modules>
@@ -217,7 +219,7 @@
 			<plugins>
 				<!-- This plugin's configuration is used to store Eclipse m2e settings
 					 only. It has no influence on the Maven build itself. -->
-				<plugin>
+				<!--<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
 					<version>1.0.0</version>
@@ -247,7 +249,7 @@
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
-				</plugin>
+				</plugin>-->
 			</plugins>
 		</pluginManagement>
 	</build>

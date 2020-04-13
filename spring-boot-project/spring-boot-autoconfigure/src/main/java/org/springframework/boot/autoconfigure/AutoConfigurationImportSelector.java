@@ -107,19 +107,33 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	 * @param annotationMetadata the annotation metadata of the configuration class
 	 * @return the auto-configurations that should be imported
 	 */
+	/**
+	 * 获取符合条件的自动配置类，避免加载不必要的自动配置类
+ 	 */
 	protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,
 			AnnotationMetadata annotationMetadata) {
 		if (!isEnabled(annotationMetadata)) {
 			return EMPTY_ENTRY;
 		}
 		AnnotationAttributes attributes = getAttributes(annotationMetadata);
+		// 【1】 获取spring.factories文件中所有的配置类
 		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+		// LinkedHashSet去除重复的自动配置类
 		configurations = removeDuplicates(configurations);
+		// 获取需要排除的自动配置类，比如注解属性的exclude的配置类
 		Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+		// 检查需要排除的自动配置类
 		checkExcludedClasses(configurations, exclusions);
+		// 【2】移除需要排除的配置类
 		configurations.removeAll(exclusions);
+		// 【3】因为从spring.factories文件获取的自动配置类太多，如果有些不必要的自动配置类都加载进内存，会造成内存浪费，因此这里需要进行过滤
+		// 这里会调用AutoConfigurationImportFilter的match方法来判断是否符合@ConditionalOnBean,@ConditionalOnClass或@ConditionalOnWebApplication
 		configurations = filter(configurations, autoConfigurationMetadata);
+		// 【4】获取了符合条件的自动配置类后，此时触发AutoConfigurationImportEvent事件，
+		// 目的是告诉ConditionEvaluationReport条件评估报告器对象来记录符合条件的自动配置类
+		// 该事件什么时候会被触发？--> 在刷新容器时调用invokeBeanFactoryPostProcessors后置处理器时触发
 		fireAutoConfigurationImportEvents(configurations, exclusions);
+		// 【5】将符合条件和要排除的自动配置类封装进AutoConfigurationEntry对象，并返回
 		return new AutoConfigurationEntry(configurations, exclusions);
 	}
 
